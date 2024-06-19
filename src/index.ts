@@ -8,9 +8,16 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import authentication from "./middlewares/authentication";
 import commentRouter from "./routes/commentRouter";
+import cors from "cors";
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 
