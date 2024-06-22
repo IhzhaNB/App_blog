@@ -55,6 +55,9 @@ export default function Signup() {
     mutation.mutate(user);
   };
 
+  const dirrectToGoogleSignIn = () =>
+    window.location.replace("http://localhost:3000/auth/google");
+
   return (
     <section className="container">
       <article className="max-w-xl mx-auto p-3">
@@ -86,7 +89,11 @@ export default function Signup() {
               </Button>
             </form>
             <p className="text-center my-3">Or</p>
-            <Button variant={"outline"} className="w-full">
+            <Button
+              variant={"outline"}
+              className="w-full"
+              onClick={dirrectToGoogleSignIn}
+            >
               <FcGoogle className="text-2xl mr-3" />
               Sign In With Google
             </Button>

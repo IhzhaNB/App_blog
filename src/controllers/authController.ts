@@ -181,7 +181,7 @@ export const handleGoogleCallback: Handler = (req, res, next) => {
 
       attachCookie(res, token);
 
-      return res.json(token);
+      return res.redirect(`http://localhost:5173`);
     }
   )(req, res, next);
 };

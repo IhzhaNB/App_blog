@@ -6,8 +6,13 @@ import Blog from "./pages/blog/Blog";
 import CreateBlog from "./pages/createBlog/CreateBlog";
 import Signin from "./pages/signin/Signin";
 import Signup from "./pages/signup/Signup";
+import { useSession } from "./context/authContext";
+import loaderPreventHasUser from "./loader/loaderPreventHasUser";
+import loaderProtectRoute from "./loader/loaderProtectRoute";
 
 function App() {
+  const { user } = useSession();
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -16,9 +21,21 @@ function App() {
       children: [
         { index: true, Component: Home },
         { path: "/blog/:id", Component: Blog },
-        { path: "/blog/create", Component: CreateBlog },
-        { path: "/signin", Component: Signin },
-        { path: "/signup", Component: Signup },
+        {
+          path: "/blog/create",
+          Component: CreateBlog,
+          loader: loaderProtectRoute(user),
+        },
+        {
+          path: "/signin",
+          Component: Signin,
+          loader: loaderPreventHasUser(user),
+        },
+        {
+          path: "/signup",
+          Component: Signup,
+          loader: loaderPreventHasUser(user),
+        },
       ],
     },
   ]);
