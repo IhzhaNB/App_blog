@@ -2,6 +2,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Menubar from "./Menubar";
 import Underline from "@tiptap/extension-underline";
+import DialogPostBlog from "./DialogPostBlog";
 
 export default function Editor() {
   const editor = useEditor({
@@ -18,6 +19,7 @@ export default function Editor() {
       <div className="p-3 bg-white">
         <EditorContent editor={editor} />
       </div>
+      {editor ? <DialogPostBlog editor={editor} /> : null}
     </div>
   );
 }

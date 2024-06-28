@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.14.0",
+    "@radix-ui/react-dialog": "^1.1.1",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -37,6 +38,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/yup": "^0.32.0",
+    "autoprefixer": "^10.4.19",
     "nodemon": "^3.1.2",
     "prisma": "^5.14.0",
     "ts-node": "^10.9.2",
