@@ -1,9 +1,20 @@
-import { useSession } from "@/context/authContext";
+import { getAllBlogs } from "@/api/blogApi";
+import { useQuery } from "@tanstack/react-query";
+import Cards from "./Cards";
 
 export default function Home() {
-  const { user } = useSession();
+  const query = useQuery({
+    queryKey: ["blogs"],
+    queryFn: getAllBlogs,
+  });
 
-  console.log(user);
-
-  return <div>Home</div>;
+  return (
+    <section className="container p-3">
+      {query.isLoading ? (
+        "Loading..."
+      ) : (
+        <Cards blogs={query.data?.data.blogs!} />
+      )}
+    </section>
+  );
 }

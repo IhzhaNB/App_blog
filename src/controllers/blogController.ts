@@ -44,8 +44,7 @@ export const createBlog: Handler = async (req, res, next) => {
 
 export const getAllBlogs: Handler = async (req, res, next) => {
   try {
-    const blogs = await prisma.blog.findMany();
-
+    const blogs = await prisma.blog.findMany({ include: { author: true } });
     return res
       .status(200)
       .json(new ResponseJson(true, "Get All Blogs Success", { blogs }));

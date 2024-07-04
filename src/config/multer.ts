@@ -20,6 +20,7 @@ const uploads = multer({
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       return cb(new ErrorResponse("Please upload an image", 400));
     }
+
     return cb(null, true);
   },
 });

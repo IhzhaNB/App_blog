@@ -12,10 +12,11 @@ const router = Router();
 
 router.post(
   "/blog/banner",
-  uploads.single("banner"),
+  uploads.single("image"),
   authentication(),
   uploadBanner
 );
+
 router.post("/blog", authentication(), createBlog);
 router.get("/blogs", getAllBlogs);
 router.get("/blog/:id", getBlog);
