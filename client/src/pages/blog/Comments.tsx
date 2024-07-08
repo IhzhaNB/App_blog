@@ -1,0 +1,136 @@
+import noProfileImage from "@/assets/noProfile.jpg";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "@/context/authContext";
+import { Blog, Comment } from "@/types";
+import { Link } from "react-router-dom";
+import * as React from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { postComment } from "@/api/commentApi";
+import CommentCard from "./CommentCard";
+
+interface Props {
+  currentBlog: Blog;
+  comments: Comment[];
+}
+
+export default function Comments(props: Props) {
+  const { user } = useSession();
+  const [commentText, setCommentText] = React.useState("");
+  const [comments, setComments] = React.useState(props.comments);
+  const { toast } = useToast();
+
+  const mutationPostComment = useMutation({
+    mutationFn: postComment,
+    onSuccess: (e) => {
+      setCommentText("");
+      toast({
+        title: "Success",
+        description: e.message,
+      });
+    },
+    onError: (e) => {
+      toast({
+        title: "Failed",
+        description: e.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleStateComment = () => {
+    const newComment: Comment = {
+      id: new Date().getTime().toString(),
+      author: user!,
+      comment: commentText,
+      blog: props.currentBlog,
+    };
+
+    setComments((prevValue) => [newComment, ...prevValue]);
+  };
+
+  const handleStateCommentDelete = (commentId: string) => {
+    setComments((prevValue) => {
+      const filteredComment = prevValue.filter(
+        (comment) => commentId !== comment.id
+      );
+      return (prevValue = filteredComment);
+    });
+  };
+
+  const handleStateCommentUpdate = (
+    commentId: string,
+    updatedCommentText: string
+  ) => {
+    setComments((prevValue) => {
+      const commentUpdated = prevValue.map((comment) => {
+        if (comment.id === commentId) {
+          return { ...comment, comment: updatedCommentText };
+        }
+
+        return comment;
+      });
+      return commentUpdated;
+    });
+  };
+
+  const handlePostComment: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    handleStateComment();
+    mutationPostComment.mutate({ commentText, blogId: props.currentBlog.id });
+  };
+
+  return (
+    <>
+      <div className="mt-10 max-w-3xl mx-auto">
+        <div className="border-y border-black py-5">
+          <h3 className="text-2xl font-bold">Comment ({comments.length})</h3>
+          {user ? (
+            <div className="flex mt-3 gap-3 items-start">
+              <div className="flex flex-col items-center gap-2">
+                <img
+                  src={noProfileImage}
+                  alt={user?.username}
+                  className="w-14 h-14 rounded-full"
+                />
+                <p className="font-bold">{user?.username}</p>
+              </div>
+
+              <form className="flex-1" onSubmit={handlePostComment}>
+                <Label htmlFor="message">Your Comment</Label>
+                <Textarea
+                  placeholder="Type your comment"
+                  id="message"
+                  className="min-h-28"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                />
+                <Button type="submit" className="mt-3 block ml-auto">
+                  {mutationPostComment.isPending ? "Loading..." : "Comment"}
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <h4 className="text-center text-lg my-3">
+              You Need Login for Comment this Blog.{" "}
+              <Link to="/signin" className="underline text-blue-500">
+                Login
+              </Link>
+            </h4>
+          )}
+        </div>
+        {comments.map((comment) => (
+          <CommentCard
+            key={comment.id}
+            {...comment}
+            isOwnComment={user?.id === comment.author.id}
+            handleDeleteState={handleStateCommentDelete}
+            handleUpdateState={handleStateCommentUpdate}
+          />
+        ))}
+      </div>
+    </>
+  );
+}

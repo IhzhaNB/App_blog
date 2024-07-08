@@ -18,8 +18,13 @@ import authConfig from "../config/auth";
 import attachCookie from "../util/attachCookie";
 
 const userRequestBody = Yup.object().shape({
-  username: Yup.string().required(),
-  password: Yup.string().required(),
+  username: Yup.string()
+    .min(3, "Username Must be at least 3 characters")
+    .max(20, "Username Too Long")
+    .required(),
+  password: Yup.string()
+    .min(8, "Password Must be at least 8 characters")
+    .required(),
 });
 
 export const register: Handler = async (req, res, next) => {
@@ -184,6 +189,17 @@ export const handleGoogleCallback: Handler = (req, res, next) => {
       return res.redirect(`http://localhost:5173`);
     }
   )(req, res, next);
+};
+
+export const logout: Handler = (req, res, next) => {
+  try {
+    res.clearCookie("token");
+    return res
+      .status(200)
+      .json(new ResponseJson(true, "Logged out Successfully", {}));
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export { passport };

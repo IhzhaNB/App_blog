@@ -17,6 +17,7 @@ export interface Blog {
   author: User;
   authorId: string;
   Comment: Comment[];
+  createdAt: Date;
 }
 
 export interface Comment {

@@ -13,7 +13,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 import { FormEventHandler, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 
 import { login } from "@/api/authApi";
@@ -21,10 +21,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function Signup() {
   const [isShow, setIsShow] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (e) => {
+      navigate("/");
       toast({
         title: "Success",
         description: e.message,
