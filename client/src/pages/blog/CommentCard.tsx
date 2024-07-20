@@ -9,28 +9,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { Comment } from "@/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import * as React from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Props extends Comment {
   isOwnComment: boolean;
-  handleDeleteState: (commentId: string) => void;
-  handleUpdateState: (commentId: string, updatedCommentText: string) => void;
+  blogId: string;
 }
 
 export default function CommentCard(comment: Props) {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [commentText, setCommentText] = React.useState(comment.comment);
   const [isEditAble, setIsEditAble] = React.useState(false);
 
   const mutationDeleteComment = useMutation({
     mutationFn: deleteComment,
-    onSuccess(e) {
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ["blog", comment.blogId],
+      });
       toast({
         title: "Success",
-        description: e.message,
+        description: "Successfully deleted comment",
       });
     },
     onError(e) {
@@ -44,10 +47,13 @@ export default function CommentCard(comment: Props) {
 
   const mutationEditComment = useMutation({
     mutationFn: editComment,
-    onSuccess(e) {
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ["blog", comment.blogId],
+      });
       toast({
         title: "Success",
-        description: e.message,
+        description: "Successfully edited comment",
       });
     },
     onError(e) {
@@ -60,23 +66,21 @@ export default function CommentCard(comment: Props) {
   });
 
   const handleDeleteComment = () => {
-    comment.handleDeleteState(comment.id);
     mutationDeleteComment.mutate({ commentId: comment.id });
   };
 
   const handleEditComment: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    comment.handleUpdateState(comment.id, commentText);
     setIsEditAble(false);
     mutationEditComment.mutate({ commentId: comment.id, comment: commentText });
   };
 
   return (
-    <div className="flex my-8 gap-3">
+    <div className="flex mt-10 max-w-3xl mx-auto">
       <img
         src={noProfileImage}
         alt={comment.author?.username}
-        className="w-10 h-10 rounded-full"
+        className="w-14 h-14 rounded-full"
       />
       <div className="flex-1">
         <p className="font-bold">{comment.author?.username}</p>
@@ -99,7 +103,7 @@ export default function CommentCard(comment: Props) {
       </div>
       {comment.isOwnComment ? (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger>
             <Button variant={"ghost"} size={"sm"} className="rounded-full">
               <BsThreeDotsVertical />
             </Button>

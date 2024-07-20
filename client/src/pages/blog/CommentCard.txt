@@ -6,8 +6,8 @@ import { useSession } from "@/context/authContext";
 import { Blog, Comment } from "@/types";
 import { Link } from "react-router-dom";
 import * as React from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postComment } from "@/api/commentApi";
 import CommentCard from "./CommentCard";
 
@@ -17,24 +17,21 @@ interface Props {
 }
 
 export default function Comments(props: Props) {
-  const queryClient = useQueryClient();
   const { user } = useSession();
   const [commentText, setCommentText] = React.useState("");
+  const [comments, setComments] = React.useState<Comment[]>(props.comments);
   const { toast } = useToast();
 
   const mutationPostComment = useMutation({
     mutationFn: postComment,
-    onSuccess(e) {
+    onSuccess: (e) => {
       setCommentText("");
-      queryClient.invalidateQueries({
-        queryKey: ["blog", props.currentBlog.id],
-      });
       toast({
         title: "Success",
         description: e.message,
       });
     },
-    onError(e) {
+    onError: (e) => {
       toast({
         title: "Failed",
         description: e.message,
@@ -43,24 +40,53 @@ export default function Comments(props: Props) {
     },
   });
 
-  const handlePostComment: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
+  const handleStateComment = () => {
+    const newComment: Comment = {
+      id: new Date().getTime().toString(),
+      author: user!,
+      comment: commentText,
+      blog: props.currentBlog,
+    };
 
-    mutationPostComment.mutate({ commentText, blogId: props.currentBlog.id });
+    setComments((prevValue) => [newComment, ...prevValue]);
   };
 
-  // Urutan komentar terbaru
-  const sortedComments = [...props.comments].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const handleStateCommentDelete = (commentId: string) => {
+    setComments((prevValue) => {
+      const filteredComment = prevValue.filter(
+        (comment) => commentId !== comment.id
+      );
+      return (prevValue = filteredComment);
+    });
+  };
+
+  const handleStateCommentUpdate = (
+    commentId: string,
+    updatedCommentText: string
+  ) => {
+    setComments((prevValue) => {
+      const commentUpdated = prevValue.map((comment) => {
+        if (comment.id === commentId) {
+          return { ...comment, comment: updatedCommentText };
+        }
+
+        return comment;
+      });
+      return commentUpdated;
+    });
+  };
+
+  const handlePostComment: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    handleStateComment();
+    mutationPostComment.mutate({ commentText, blogId: props.currentBlog.id });
+  };
 
   return (
     <>
       <div className="mt-10 max-w-3xl mx-auto">
         <div className="border-y border-black py-5">
-          <h3 className="text-2xl font-bold">
-            Comment ({props.comments.length})
-          </h3>
+          <h3 className="text-2xl font-bold">Comment ({comments.length})</h3>
           {user ? (
             <div className="flex mt-3 gap-3 items-start">
               <div className="flex flex-col items-center gap-2">
@@ -95,12 +121,13 @@ export default function Comments(props: Props) {
             </h4>
           )}
         </div>
-        {sortedComments.map((comment) => (
+        {comments.map((comment) => (
           <CommentCard
             key={comment.id}
             {...comment}
             isOwnComment={user?.id === comment.author.id}
-            blogId={props.currentBlog.id}
+            handleDeleteState={handleStateCommentDelete}
+            handleUpdateState={handleStateCommentUpdate}
           />
         ))}
       </div>

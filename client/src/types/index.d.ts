@@ -25,4 +25,6 @@ export interface Comment {
   comment: string;
   blog: Blog;
   author: User;
+  createdAt: Date;
+  updatedAt: Date;
 }

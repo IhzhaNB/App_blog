@@ -5,6 +5,7 @@ import "./index.css";
 
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { AuthProvider } from "./context/authContext.tsx";
+// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <App />
       </AuthProvider>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   </React.StrictMode>
 );
